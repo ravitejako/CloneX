@@ -1,0 +1,14 @@
+flask==3.0.2
+requests==2.31.0
+beautifulsoup4==4.12.3
+urllib3==2.2.1
+cssutils==2.9.0
+selenium==4.18.1
+webdriver-manager==4.0.1
+lxml==5.1.0
+Pillow==10.2.0
+python-magic==0.4.27
+tqdm==4.66.2
+aiohttp==3.9.3
+asyncio==3.4.3
+python-dotenv==1.0.1 

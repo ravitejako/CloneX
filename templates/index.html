@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Extractor - Pixel Perfect Clone</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .loading {
+            display: none;
+        }
+        .loading.active {
+            display: block;
+        }
+        .progress-bar {
+            transition: width 0.3s ease-in-out;
+        }
+        .feature-badge {
+            background-color: #ebf8ff;
+            color: #3182ce;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+        #chat-messages {
+            margin-bottom: 80px;
+        }
+        .chat-bubble {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+        .chat-bubble.bot {
+            justify-content: flex-start;
+        }
+        .chat-bubble.user {
+            justify-content: flex-end;
+        }
+        .bubble {
+            padding: 0.75rem 1.25rem;
+            border-radius: 1.5rem;
+            max-width: 80%;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+        }
+        .bubble.bot {
+            background: #f3f4f6;
+            color: #222;
+        }
+        .bubble.user {
+            background: #22c55e;
+            color: white;
+        }
+        .avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .avatar.user { background: #22c55e; color: white; }
+        .avatar.bot { background: #f3f4f6; color: #222; }
+
+        /* Dark mode styles */
+        .dark {
+            background-color: #1a202c;
+            color: #f7fafc;
+        }
+        .dark .bg-white {
+            background-color: #2d3748;
+        }
+        .dark .text-gray-800 {
+            color: #f7fafc;
+        }
+        .dark .border-gray-300 {
+            border-color: #4a5568;
+        }
+        .dark .bg-gray-100 {
+            background-color: #2d3748;
+        }
+        .dark .text-gray-500 {
+            color: #a0aec0;
+        }
+        .dark .bg-gray-200 {
+            background-color: #4a5568;
+        }
+        .dark .bg-gray-300 {
+            background-color: #4a5568;
+        }
+        .dark .text-red-700 {
+            color: #fc8181;
+        }
+        .dark .bg-red-100 {
+            background-color: #2d3748;
+        }
+        .dark .text-green-700 {
+            color: #9ae6b4;
+        }
+        .dark .bg-green-100 {
+            background-color: #2d3748;
+        }
+        .dark .bubble.bot {
+            background: #2d3748;
+            color: #f7fafc;
+        }
+        .dark .avatar.bot {
+            background: #2d3748;
+            color: #f7fafc;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+        
+        .modal-content {
+            position: relative;
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark .modal-content {
+            background-color: #2d3748;
+            color: #f7fafc;
+        }
+        
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            cursor: pointer;
+            font-size: 24px;
+        }
+        
+        .feature-list {
+            margin-top: 1rem;
+            padding-left: 1.5rem;
+        }
+        
+        .feature-list li {
+            margin-bottom: 0.75rem;
+            list-style-type: disc;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col h-screen transition-colors duration-300" id="body">
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">How to Use Website Extractor</h2>
+            <p class="mb-4">Extract a pixel-perfect clone of any website with these simple steps:</p>
+            <ul class="feature-list">
+                <li>Enter the complete URL of the website you want to extract (e.g., https://example.com)</li>
+                <li>Toggle the "Selenium" checkbox if you need advanced rendering support for dynamic websites</li>
+                <li>Click "Send" to start the extraction process</li>
+                <li>Wait for the process to complete - this may take a few moments depending on the website size</li>
+                <li>Click the "Download ZIP" button when it appears to get your extracted files</li>
+            </ul>
+            <h3 class="text-xl font-bold mt-6 mb-2">Features</h3>
+            <ul class="feature-list">
+                <li>Extracts HTML, CSS, JavaScript, images, and other assets</li>
+                <li>Maintains directory structure and file organization</li>
+                <li>Fixes relative URLs automatically</li>
+                <li>Supports modern web frameworks and dynamic content</li>
+                <li>Dark mode support for comfortable viewing</li>
+            </ul>
+            <div class="mt-6 text-sm text-gray-600 dark:text-gray-400">
+                Note: Some websites may have protection against automated access. The Selenium option can help in such cases.
+            </div>
+        </div>
+    </div>
+
+    <!-- ChatGPT-style header -->
+    <header class="flex items-center justify-between px-6 py-4 bg-white dark:bg-gray-900 border-b shadow-sm sticky top-0 z-10 transition-colors duration-300">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl font-bold text-green-600 dark:text-green-400">CloneX</span>
+            <span class="text-base text-gray-400 dark:text-gray-300 font-medium ml-2">Website Extractor</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <button id="helpBtn" class="text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors" title="Help">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </button>
+            <button id="theme-toggle" class="text-2xl" title="Toggle dark/light mode">🌙</button>
+        </div>
+    </header>
+
+    <!-- Chat message area -->
+    <main class="flex-1 overflow-y-auto flex flex-col items-center bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+        <div id="chat-messages" class="w-full max-w-2xl px-2 py-6 flex flex-col gap-4 overflow-y-auto" style="scroll-behavior: smooth;">
+            <!-- Chat bubbles will be dynamically inserted here by JS -->
+        </div>
+    </main>
+
+    <!-- ChatGPT-style input bar at the bottom -->
+    <form id="extractForm" class="fixed bottom-0 left-0 right-0 w-full max-w-2xl mx-auto px-2 py-4 flex gap-2 bg-white dark:bg-gray-800 border-t z-20 transition-colors duration-300" style="box-shadow: 0 -2px 16px 0 rgba(0,0,0,0.04);">
+        <input type="url" id="url" name="url" required placeholder="Paste website URL here..." class="flex-1 rounded-full border border-gray-300 dark:border-gray-700 px-4 py-2 focus:border-green-500 focus:ring-green-500 outline-none bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100" autocomplete="off">
+        <input type="checkbox" id="use_selenium" name="use_selenium" value="true" class="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded mt-2">
+        <label for="use_selenium" class="ml-2 text-xs text-gray-500 dark:text-gray-300 mt-2">Selenium</label>
+        <button id="sendBtn" type="submit" class="bg-green-500 hover:bg-green-600 text-white rounded-full px-6 py-2 font-bold shadow flex items-center gap-2">Send <span id="spinner" class="hidden ml-2 w-4 h-4 border-2 border-t-2 border-t-white border-green-200 rounded-full animate-spin"></span></button>
+    </form>
+
+    <script>
+        // Dark mode functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.getElementById('body');
+        
+        // Check for saved theme preference or use system preference
+        const savedTheme = localStorage.getItem('theme') || 
+            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        
+        // Apply the saved theme
+        if (savedTheme === 'dark') {
+            body.classList.add('dark');
+            themeToggle.textContent = '☀️';
+        }
+        
+        // Theme toggle handler
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            const isDark = body.classList.contains('dark');
+            themeToggle.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // Form submission and download handling
+        const form = document.getElementById('extractForm');
+        const urlInput = document.getElementById('url');
+        const sendBtn = document.getElementById('sendBtn');
+        const spinner = document.getElementById('spinner');
+        const chatMessages = document.getElementById('chat-messages');
+
+        function addBubble({text, sender, streaming, timestamp, isHtml}) {
+            const wrapper = document.createElement('div');
+            wrapper.className = `chat-bubble ${sender} w-full flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${sender} shrink-0 mt-auto`;
+            avatar.innerHTML = sender === 'user' ? '<svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="14" fill="#22c55e"/><text x="50%" y="55%" text-anchor="middle" fill="#fff" font-size="14" font-family="Arial" dy=".3em">U</text></svg>' : '<svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="14" fill="#f3f4f6"/><text x="50%" y="55%" text-anchor="middle" fill="#222" font-size="14" font-family="Arial" dy=".3em">🤖</text></svg>';
+            const bubble = document.createElement('div');
+            bubble.className = `bubble ${sender} relative`;
+            if (isHtml) {
+                bubble.innerHTML = text;
+            } else {
+                bubble.textContent = streaming ? '' : text;
+            }
+            const ts = document.createElement('div');
+            ts.className = `text-xs text-gray-400 dark:text-gray-500 mt-1 text-right`;
+            ts.textContent = timestamp || new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            bubble.appendChild(ts);
+            wrapper.appendChild(sender === 'user' ? bubble : avatar);
+            wrapper.appendChild(sender === 'user' ? avatar : bubble);
+            chatMessages.appendChild(wrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return bubble;
+        }
+
+        function showSpinner(show) {
+            if (show) { 
+                spinner.classList.remove('hidden'); 
+                sendBtn.disabled = true; 
+                urlInput.disabled = true; 
+            } else { 
+                spinner.classList.add('hidden'); 
+                sendBtn.disabled = false; 
+                urlInput.disabled = false; 
+            }
+        }
+
+        function addBotBubble(content, isText = true) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'chat-bubble bot w-full flex justify-start';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar bot shrink-0 mt-auto';
+            avatar.innerHTML = '<svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="14" fill="#f3f4f6"/><text x="50%" y="55%" text-anchor="middle" fill="#222" font-size="14" font-family="Arial" dy=".3em">🤖</text></svg>';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble bot relative';
+            
+            if (isText) {
+                bubble.textContent = content;
+            } else {
+                bubble.innerHTML = content;
+            }
+            
+            const ts = document.createElement('div');
+            ts.className = 'text-xs text-gray-400 dark:text-gray-500 mt-1 text-right';
+            ts.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            bubble.appendChild(ts);
+            
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(bubble);
+            chatMessages.appendChild(wrapper);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return bubble;
+        }
+
+        function addUserBubble(text) {
+            return addBubble({text, sender: 'user'});
+        }
+
+        // Initial welcome message
+        addBotBubble('Hi! Enter a website URL below to extract a pixel-perfect clone.', true);
+
+        // Handle form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const url = urlInput.value.trim();
+            const useSelenium = document.getElementById('use_selenium').checked;
+            
+            if (!url) {
+                addBotBubble('Please enter a valid URL');
+                return;
+            }
+            
+            addUserBubble(url);
+            showSpinner(true);
+            addBotBubble('Extracting website assets...', true);
+            
+            try {
+                // Send the URL to the backend
+                const formData = new FormData();
+                formData.append('url', url);
+                formData.append('use_selenium', useSelenium);
+                
+                const response = await fetch('/extract', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to extract website');
+                }
+                
+                // Create a blob from the response
+                const blob = await response.blob();
+                
+                // Add download button to chat
+                addBotBubble('Website extracted successfully! Click the button below to download:', true);
+                
+                // Create a form for direct download
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/extract';
+                form.style.display = 'inline';
+                
+                // Add the URL input
+                const urlInput = document.createElement('input');
+                urlInput.type = 'hidden';
+                urlInput.name = 'url';
+                urlInput.value = url;
+                form.appendChild(urlInput);
+                
+                // Add the selenium checkbox value
+                const seleniumInput = document.createElement('input');
+                seleniumInput.type = 'hidden';
+                seleniumInput.name = 'use_selenium';
+                seleniumInput.value = document.getElementById('use_selenium').checked;
+                form.appendChild(seleniumInput);
+                
+                // Create the download button
+                const downloadButton = document.createElement('button');
+                downloadButton.type = 'submit';
+                downloadButton.className = 'flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-full font-bold shadow hover:bg-green-700 transition-colors';
+                downloadButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download ZIP
+                `;
+                form.appendChild(downloadButton);
+                
+                // Add the form to a new bot bubble
+                const buttonWrapper = document.createElement('div');
+                buttonWrapper.appendChild(form);
+                addBotBubble(buttonWrapper.innerHTML, false);
+                
+                // Clear the input
+                urlInput.value = '';
+                
+            } catch (error) {
+                addBotBubble(`Error: ${error.message}`);
+            } finally {
+                showSpinner(false);
+            }
+        });
+
+        urlInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                form.requestSubmit();
+                e.preventDefault();
+            }
+        });
+
+        // Help modal functionality
+        const modal = document.getElementById('helpModal');
+        const helpBtn = document.getElementById('helpBtn');
+        const closeModal = document.getElementById('closeModal');
+
+        helpBtn.addEventListener('click', () => {
+            modal.style.display = 'block';
+        });
+
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modal.style.display === 'block') {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html> 

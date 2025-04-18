@@ -1,0 +1,341 @@
+<!-- 
+This file is no longer used in the application.
+The components viewer functionality has been removed as it was not working properly.
+The file is kept for reference purposes only.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extracted Components Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .component-preview {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .component-preview:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .component-code {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        .component-code.active {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .badge {
+            background-color: #ebf8ff;
+            color: #3182ce;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 6px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Extracted Components</h1>
+                    <p class="text-gray-600">
+                        {% if extracted_url is defined and extracted_url %}
+                        Components extracted from: <a href="{{ extracted_url }}" target="_blank" class="text-blue-600 hover:underline">{{ extracted_url }}</a>
+                        {% else %}
+                        Browse and inspect all extracted UI components from the website
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="/" class="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Back to Main Page
+                </a>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <div class="flex items-center mb-4">
+                    <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h2 class="text-xl font-semibold">How to Use This Viewer</h2>
+                </div>
+                <ol class="list-decimal pl-5 space-y-2 text-gray-600">
+                    <li>Browse through the component categories below</li>
+                    <li>Click on any component to view its preview</li>
+                    <li>Use the "View Code" button to see the HTML structure</li>
+                    <li>Copy the code to use in your own projects</li>
+                    <li>Click "View in Context" to see how the component appears on the original page</li>
+                </ol>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <h2 class="text-xl font-semibold">Navigation</h2>
+                    </div>
+                    <p class="text-gray-600 mb-4">Headers, menus, and navigation bars</p>
+                    <div class="text-sm text-gray-500">
+                        <span class="font-medium text-gray-700">{{ navigation_count }}</span> components found
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                        <h2 class="text-xl font-semibold">Hero Sections</h2>
+                    </div>
+                    <p class="text-gray-600 mb-4">Main banners and hero areas</p>
+                    <div class="text-sm text-gray-500">
+                        <span class="font-medium text-gray-700">{{ hero_count }}</span> components found
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        <h2 class="text-xl font-semibold">Cards</h2>
+                    </div>
+                    <p class="text-gray-600 mb-4">Product cards, info cards, and pricing cards</p>
+                    <div class="text-sm text-gray-500">
+                        <span class="font-medium text-gray-700">{{ card_count }}</span> components found
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        <h2 class="text-xl font-semibold">Sections</h2>
+                    </div>
+                    <p class="text-gray-600 mb-4">Content sections and feature blocks</p>
+                    <div class="text-sm text-gray-500">
+                        <span class="font-medium text-gray-700">{{ section_count }}</span> components found
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        <h2 class="text-xl font-semibold">Forms</h2>
+                    </div>
+                    <p class="text-gray-600 mb-4">Contact forms, sign-up forms, and inputs</p>
+                    <div class="text-sm text-gray-500">
+                        <span class="font-medium text-gray-700">{{ form_count }}</span> components found
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                        </svg>
+                        <h2 class="text-xl font-semibold">Footers</h2>
+                    </div>
+                    <p class="text-gray-600 mb-4">Page footers and bottom sections</p>
+                    <div class="text-sm text-gray-500">
+                        <span class="font-medium text-gray-700">{{ footer_count }}</span> components found
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                        </svg>
+                        <h2 class="text-xl font-semibold">Store Components</h2>
+                        <span class="badge">NEW</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">Product listings, filters, and store layouts</p>
+                    <div class="text-sm text-gray-500">
+                        <span class="font-medium text-gray-700">{{ store_count }}</span> components found
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        <h2 class="text-xl font-semibold">Mobile Components</h2>
+                        <span class="badge">NEW</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">Mobile-specific UI elements and responsive components</p>
+                    <div class="text-sm text-gray-500">
+                        <span class="font-medium text-gray-700">{{ mobile_count }}</span> components found
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex items-center mb-4">
+                        <svg class="w-6 h-6 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                        <h2 class="text-xl font-semibold">Cart Components</h2>
+                        <span class="badge">NEW</span>
+                    </div>
+                    <p class="text-gray-600 mb-4">Shopping cart elements and checkout flows</p>
+                    <div class="text-sm text-gray-500">
+                        <span class="font-medium text-gray-700">{{ cart_count }}</span> components found
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-4">Metadata</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-medium text-gray-800 mb-2">Page Title</h3>
+                        <p class="text-gray-600">{{ page_title }}</p>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-medium text-gray-800 mb-2">Description</h3>
+                        <p class="text-gray-600">{{ meta_description }}</p>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-medium text-gray-800 mb-2">Keywords</h3>
+                        <div class="flex flex-wrap gap-2">
+                            {% for keyword in meta_keywords %}
+                            <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">{{ keyword }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h3 class="font-medium text-gray-800 mb-2">Open Graph</h3>
+                        <div class="space-y-2">
+                            <p class="text-sm"><span class="font-medium">Title:</span> {{ og_title }}</p>
+                            <p class="text-sm"><span class="font-medium">Description:</span> {{ og_description }}</p>
+                            <p class="text-sm"><span class="font-medium">Image:</span> {{ og_image }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+                <h2 class="text-xl font-semibold mb-4">Framework Configuration</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                            </svg>
+                            <h3 class="font-medium text-gray-800">Next.js Configuration</h3>
+                            <span class="badge">NEW</span>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-md">
+                            <pre class="text-xs text-gray-700 overflow-x-auto">{{ next_config }}</pre>
+                        </div>
+                    </div>
+                    
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <svg class="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                            </svg>
+                            <h3 class="font-medium text-gray-800">Tailwind Configuration</h3>
+                            <span class="badge">NEW</span>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-md">
+                            <pre class="text-xs text-gray-700 overflow-x-auto">{{ tailwind_config }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Component Previews -->
+            <div class="space-y-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Component Previews</h2>
+                
+                {% if components|length > 0 %}
+                {% for component in components %}
+                <div class="component-preview bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-medium text-gray-800">{{ component.name }}</h3>
+                            <p class="text-sm text-gray-500">{{ component.type }}</p>
+                        </div>
+                        <div class="space-x-2">
+                            <button class="view-code-btn bg-gray-200 hover:bg-gray-300 text-gray-700 py-1 px-3 rounded text-sm transition-colors duration-200"
+                                    data-target="code-{{ component.id }}">
+                                View Code
+                            </button>
+                            <a href="{{ component.context_url }}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-sm transition-colors duration-200">
+                                View in Context
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 bg-white">
+                        <div class="component-preview-content">
+                            {{ component.html|safe }}
+                        </div>
+                    </div>
+                    
+                    <div id="code-{{ component.id }}" class="component-code bg-gray-100 p-4 border-t border-gray-200">
+                        <pre class="text-xs text-gray-700 overflow-x-auto p-4 bg-gray-50 rounded"><code>{{ component.code }}</code></pre>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                No components were found in the extracted website. This could be because:
+                            </p>
+                            <ul class="mt-2 text-sm text-yellow-700 list-disc list-inside">
+                                <li>The website uses a complex structure that's difficult to extract</li>
+                                <li>The website uses custom components that don't match our extraction patterns</li>
+                                <li>You're viewing the demo components instead of an actual extraction</li>
+                            </ul>
+                            <p class="mt-2 text-sm text-yellow-700">
+                                Try extracting a different website or check the ZIP file for the complete website clone.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle code view
+            const codeButtons = document.querySelectorAll('.view-code-btn');
+            codeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const codeElement = document.getElementById(targetId);
+                    codeElement.classList.toggle('active');
+                    this.textContent = codeElement.classList.contains('active') ? 'Hide Code' : 'View Code';
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
